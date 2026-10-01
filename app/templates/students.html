@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Student Directory | {{ app_name }}{% endblock %}
+{% block page_title %}Student Database Directory{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <!-- Filters & Action Bar -->
+    <div class="card" style="padding: 1.25rem;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+            
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 280px; max-width: 500px;">
+                <input type="text" id="student-search-input" class="form-control" placeholder="Search by name, roll no, or email..." />
+                <select id="student-dept-filter" class="form-control" style="width: auto;">
+                    <option value="All">All Departments</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span id="students-count-badge" class="badge badge-info" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                    0 Students
+                </span>
+                <a href="/register" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add New Student
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Students Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Student ID</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Year / Sem</th>
+                        <th>Face Samples</th>
+                        <th>Registered Date</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="students-table-body">
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-subtle);">
+                            Loading student directory...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal 1: Edit Student Details -->
+<div class="modal-overlay" id="edit-student-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Student Information</h3>
+            <button class="btn-close-modal" onclick="closeModal('edit-student-modal')">&times;</button>
+        </div>
+        <form id="edit-student-form" onsubmit="return false;">
+            <input type="hidden" id="edit-student-id-hidden" />
+            <div class="form-group">
+                <label class="form-label">Student ID (Cannot be changed)</label>
+                <input type="text" id="edit-student-id-display" class="form-control" disabled style="opacity: 0.7;" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" id="edit-name" class="form-control" required />
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Department *</label>
+                    <input type="text" id="edit-dept" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Year / Semester</label>
+                    <input type="text" id="edit-year" class="form-control" />
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="edit-email" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" id="edit-phone" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Gender</label>
+                <select id="edit-gender" class="form-control">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-student-modal')">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-save-edit-student">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 2: Re-Enroll Face -->
+<div class="modal-overlay" id="reenroll-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Re-Enroll Face Samples</h3>
+            <button class="btn-close-modal" onclick="closeModal('reenroll-modal')">&times;</button>
+        </div>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Upload or capture new face photos for <strong id="reenroll-student-name"></strong>. This will replace the previous face model samples.
+        </p>
+        
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+            <label class="btn btn-primary" style="cursor: pointer; flex: 1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Select New Photos
+                <input type="file" id="reenroll-file-input" accept="image/*" multiple style="display: none;" />
+            </label>
+        </div>
+
+        <div id="reenroll-samples-preview" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+            <span style="color: var(--text-subtle); font-size: 0.8rem;">No new photos selected yet.</span>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('reenroll-modal')">Cancel</button>
+            <button type="button" class="btn btn-success" id="btn-submit-reenroll" disabled>Confirm & Update Model</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/students.js"></script>
+{% endblock %}

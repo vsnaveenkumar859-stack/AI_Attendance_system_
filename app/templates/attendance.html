@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Records | {{ app_name }}{% endblock %}
+{% block page_title %}Attendance History & Reports{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <!-- Filter Control Card -->
+    <div class="card" style="padding: 1.25rem;">
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- Row 1: Search & Dropdowns -->
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; flex: 1;">
+                    <input type="text" id="att-search-input" class="form-control" placeholder="Search by student name or roll number..." style="min-width: 250px; max-width: 380px;" />
+
+                    <select id="att-dept-filter" class="form-control" style="width: auto;">
+                        <option value="All">All Departments</option>
+                    </select>
+
+                    <select id="att-status-filter" class="form-control" style="width: auto;">
+                        <option value="All">All Statuses</option>
+                        <option value="Present">Present Only</option>
+                        <option value="Late">Late Only</option>
+                    </select>
+                </div>
+
+                <!-- Export & Manual Mark Buttons -->
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" id="btn-open-manual-modal">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Manual Entry
+                    </button>
+                    <button class="btn btn-secondary" id="btn-export-csv">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        CSV Export
+                    </button>
+                    <button class="btn btn-success" id="btn-export-excel">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        Excel (.xlsx)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 2: Date Filters & Summary Badges -->
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.85rem;">
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Date Range:</span>
+                    <button class="btn btn-secondary btn-sm date-preset-btn active" data-preset="all">All Time</button>
+                    <button class="btn btn-secondary btn-sm date-preset-btn" data-preset="today">Today</button>
+                    <button class="btn btn-secondary btn-sm date-preset-btn" data-preset="yesterday">Yesterday</button>
+                    <button class="btn btn-secondary btn-sm date-preset-btn" data-preset="week">Last 7 Days</button>
+                    <button class="btn btn-secondary btn-sm date-preset-btn" data-preset="month">This Month</button>
+                    
+                    <div style="display: inline-flex; align-items: center; gap: 0.35rem; margin-left: 0.5rem;">
+                        <input type="date" id="att-start-date" class="form-control" style="width: auto; padding: 0.35rem 0.6rem; font-size: 0.8rem;" />
+                        <span style="color: var(--text-subtle); font-size: 0.8rem;">to</span>
+                        <input type="date" id="att-end-date" class="form-control" style="width: auto; padding: 0.35rem 0.6rem; font-size: 0.8rem;" />
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span id="badge-total-records" class="badge badge-info">0 Records</span>
+                    <span id="badge-total-present" class="badge badge-present">0 Present</span>
+                    <span id="badge-total-late" class="badge badge-late">0 Late</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Attendance Log Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Student ID</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Match Score</th>
+                        <th>Method</th>
+                        <th>Notes</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-table-body">
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 3rem; color: var(--text-subtle);">
+                            Loading attendance records...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal: Manual Attendance Entry -->
+<div class="modal-overlay" id="manual-att-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Manual Attendance Entry</h3>
+            <button class="btn-close-modal" onclick="closeModal('manual-att-modal')">&times;</button>
+        </div>
+        <form id="manual-att-form" onsubmit="return false;">
+            <div class="form-group">
+                <label class="form-label">Student ID / Roll No *</label>
+                <input type="text" id="manual-student-id" class="form-control" placeholder="e.g. STU-2026-001" required />
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Date *</label>
+                    <input type="date" id="manual-date" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time *</label>
+                    <input type="time" id="manual-time" class="form-control" step="1" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status *</label>
+                <select id="manual-status" class="form-control">
+                    <option value="Present">Present</option>
+                    <option value="Late">Late</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Admin Notes</label>
+                <input type="text" id="manual-notes" class="form-control" placeholder="Reason for manual entry..." />
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('manual-att-modal')">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-submit-manual-att">Record Attendance</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/attendance.js"></script>
+{% endblock %}

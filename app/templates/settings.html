@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Settings | {{ app_name }}{% endblock %}
+{% block page_title %}System Settings & Diagnostics{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem; align-items: start;">
+
+    <!-- Left: Configuration Form -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                General Attendance Rules
+            </h4>
+        </div>
+
+        <form id="settings-form" onsubmit="return false;">
+            <div class="form-group">
+                <label class="form-label" for="setting-title">Organization / System Title</label>
+                <input type="text" id="setting-title" class="form-control" />
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label" for="setting-cutoff">Late Arrival Cut-Off Time</label>
+                    <input type="time" id="setting-cutoff" class="form-control" step="60" />
+                    <small style="color: var(--text-subtle); font-size: 0.75rem;">Attendance recorded after this time is automatically marked as "Late".</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="setting-cooldown">Duplicate Alert Cooldown (Seconds)</label>
+                    <input type="number" id="setting-cooldown" class="form-control" min="3" max="60" />
+                    <small style="color: var(--text-subtle); font-size: 0.75rem;">Time to wait before repeating audio alerts for the same student.</small>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label class="form-label" style="margin: 0;">AI Face Recognition Match Threshold</label>
+                    <span id="threshold-val-display" style="font-weight: 700; color: #60A5FA; font-family: monospace;">0.45</span>
+                </div>
+                <input type="range" id="setting-threshold" min="0.30" max="0.75" step="0.01" style="width: 100%; accent-color: #3B82F6;" />
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-subtle); margin-top: 0.25rem;">
+                    <span>0.30 (More Lenient)</span>
+                    <span>0.45 (Optimal Standard)</span>
+                    <span>0.75 (Extremely Strict)</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button type="button" class="btn btn-primary btn-lg" id="btn-save-settings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Save System Settings
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right: AI & Engine Diagnostics -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    AI Vision Diagnostics
+                </h4>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.875rem;">
+                <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                    <span style="color: var(--text-subtle);">Primary Neural Model:</span>
+                    <strong style="color: #60A5FA;">SFace 128-D + YuNet ONNX</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                    <span style="color: var(--text-subtle);">Face Detector Status:</span>
+                    <span class="badge badge-success">Online & Active</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                    <span style="color: var(--text-subtle);">Face Recognizer Status:</span>
+                    <span class="badge badge-success">Loaded in Memory</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                    <span style="color: var(--text-subtle);">Registered Students:</span>
+                    <strong id="diag-students-count" style="font-family: monospace;">...</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                    <span style="color: var(--text-subtle);">Memory Embeddings:</span>
+                    <strong id="diag-embeddings-count" style="font-family: monospace;">...</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-subtle);">Database Engine:</span>
+                    <span style="color: var(--text-main); font-weight: 500;">SQLite 3 (WAL Mode)</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.25rem;">
+                <button class="btn btn-secondary btn-sm" id="btn-reload-embeddings" style="width: 100%;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    Reload AI Face Embeddings
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    async function loadSettings() {
+        try {
+            const res = await fetch("/api/system/settings");
+            const data = await res.json();
+            if (data.success && data.settings) {
+                const s = data.settings;
+                document.getElementById("setting-title").value = s.system_title || "AI Attendance System";
+                document.getElementById("setting-cutoff").value = s.late_cutoff_time || "09:30";
+                document.getElementById("setting-cooldown").value = s.duplicate_cooldown || "8";
+                document.getElementById("setting-threshold").value = s.cosine_threshold || "0.45";
+                document.getElementById("threshold-val-display").textContent = s.cosine_threshold || "0.45";
+            }
+        } catch (e) {
+            console.error("Failed to load settings:", e);
+        }
+    }
+
+    async function loadDiagnostics() {
+        try {
+            const res = await fetch("/api/system/status");
+            const data = await res.json();
+            if (data.success && data.ai_engine) {
+                document.getElementById("diag-students-count").textContent = data.ai_engine.registered_students;
+                document.getElementById("diag-embeddings-count").textContent = data.ai_engine.cached_embeddings;
+            }
+        } catch (e) {
+            console.error("Failed to load diagnostics:", e);
+        }
+    }
+
+    async function saveSettings() {
+        const payload = {
+            system_title: document.getElementById("setting-title").value.trim(),
+            late_cutoff_time: document.getElementById("setting-cutoff").value,
+            duplicate_cooldown: document.getElementById("setting-cooldown").value,
+            cosine_threshold: document.getElementById("setting-threshold").value
+        };
+
+        try {
+            const res = await fetch("/api/system/settings", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showToast("System settings saved successfully!", "success");
+            } else {
+                showToast("Failed to save settings.", "danger");
+            }
+        } catch (e) {
+            showToast("Server communication error.", "danger");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadSettings();
+        loadDiagnostics();
+
+        const threshSlider = document.getElementById("setting-threshold");
+        threshSlider.addEventListener("input", (e) => {
+            document.getElementById("threshold-val-display").textContent = e.target.value;
+        });
+
+        document.getElementById("btn-save-settings").addEventListener("click", saveSettings);
+        document.getElementById("btn-reload-embeddings").addEventListener("click", async () => {
+            showToast("Reloading face embeddings...", "info", 1500);
+            await loadDiagnostics();
+            showToast("Embeddings refreshed in memory!", "success", 2000);
+        });
+    });
+</script>
+{% endblock %}

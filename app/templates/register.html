@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Enroll Student | {{ app_name }}{% endblock %}
+{% block page_title %}Student Registration & Face Enrollment{% endblock %}
+
+{% block head %}
+<style>
+    .enroll-camera-box {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        background-color: #030712;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #enroll-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1);
+    }
+
+    .face-guide-oval {
+        position: absolute;
+        width: 55%;
+        height: 70%;
+        border: 2px dashed rgba(59, 130, 246, 0.6);
+        border-radius: 50%;
+        pointer-events: none;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .samples-gallery {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+        min-height: 85px;
+        padding: 0.75rem;
+        background-color: var(--bg-input);
+        border-radius: var(--radius-md);
+        border: 1px dashed var(--border-color);
+    }
+
+    .sample-thumb {
+        position: relative;
+        width: 75px;
+        height: 75px;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        border: 2px solid #3B82F6;
+    }
+
+    .sample-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .btn-remove-sample {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: rgba(239, 68, 68, 0.85);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<form id="enroll-form" onsubmit="return false;">
+    <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2rem; align-items: start;">
+
+        <!-- Left: Student Details Form -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Student Information
+                </h4>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label" for="student_id">Student ID / Roll No *</label>
+                    <input type="text" id="student_id" name="student_id" class="form-control" placeholder="e.g. STU-2026-001" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Alex Johnson" required />
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label" for="department">Department / Course *</label>
+                    <select id="department" name="department" class="form-control" required>
+                        <option value="">Select Department</option>
+                        <option value="Computer Science">Computer Science & AI</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electrical Engineering">Electrical Engineering</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                        <option value="Business Administration">Business Administration</option>
+                        <option value="Data Science">Data Science</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="year_semester">Year / Semester</label>
+                    <input type="text" id="year_semester" name="year_semester" class="form-control" placeholder="e.g. 3rd Year / Sem 5" />
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="alex.j@example.edu" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="+1 (555) 019-2834" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="gender">Gender</label>
+                <select id="gender" name="gender" class="form-control">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-enroll" style="flex: 1;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Register & Enroll Face</span>
+                </button>
+                <button type="reset" class="btn btn-secondary" id="btn-reset-form">Reset</button>
+            </div>
+        </div>
+
+        <!-- Right: Face Capture & Enrollment -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    Face Enrollment (Webcam / Upload)
+                </h4>
+                <span id="enroll-sample-counter" class="badge badge-info">0 / 5 Samples</span>
+            </div>
+
+            <!-- Camera View -->
+            <div class="enroll-camera-box">
+                <video id="enroll-video" autoplay playsinline muted></video>
+                <div class="face-guide-oval"></div>
+                <div id="enroll-camera-placeholder" style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; color: var(--text-muted); padding: 1.5rem; text-align: center;">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.5">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <span>Click "Start Camera" to capture face photos directly from webcam.</span>
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-start-enroll-cam">Start Camera</button>
+                </div>
+            </div>
+
+            <!-- Capture Actions -->
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-success" id="btn-snap-photo" style="flex: 1;" disabled>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Capture Sample
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-auto-capture" disabled title="Automatically captures 3 samples with slight angles">
+                    ⚡ Auto 3-Shot
+                </button>
+                <label class="btn btn-secondary" style="cursor: pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Upload Photo
+                    <input type="file" id="file-photo-upload" accept="image/*" multiple style="display: none;" />
+                </label>
+            </div>
+
+            <!-- Captured Samples Strip -->
+            <div style="margin-top: 1rem;">
+                <div style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    Enrolled Face Samples (1-5 recommended for best accuracy):
+                </div>
+                <div class="samples-gallery" id="samples-container">
+                    <span style="color: var(--text-subtle); font-size: 0.8rem; align-self: center; margin: auto;">No face samples captured yet.</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/register.js"></script>
+{% endblock %}
