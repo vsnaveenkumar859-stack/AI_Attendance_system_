@@ -1,0 +1,6 @@
+@echo off
+cd d %~dp0
+call .venvScriptsactivate.bat
+start httplocalhost8000scanner
+python run.py
+pause
